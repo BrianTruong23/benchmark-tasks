@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Search and inspect 2,475 computer-use benchmark tasks across seven benchmark suites."
+    />
+    <meta name="theme-color" content="#11100e" />
+    <title>Benchmark Task Catalog</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#results">Skip to results</a>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Benchmark Task Catalog home">
+        <span class="brand-mark" aria-hidden="true">BT</span>
+        <span>
+          <strong>Benchmark Tasks</strong>
+          <small>Catalog / 2026</small>
+        </span>
+      </a>
+      <a
+        class="repo-link"
+        href="https://github.com/BrianTruong23/benchmark-tasks"
+        target="_blank"
+        rel="noreferrer"
+      >
+        View source <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="eyebrow"><span></span> Public task inventory</div>
+        <div class="hero-grid">
+          <div>
+            <h1 id="page-title">Every task.<br /><em>One clean view.</em></h1>
+            <p class="hero-copy">
+              Browse the software, instructions, and task types behind seven
+              computer-use benchmarks. Search the full catalog or narrow it to
+              exactly the slice you need.
+            </p>
+          </div>
+          <div class="hero-stats" aria-label="Catalog statistics">
+            <div><strong id="totalTasks">—</strong><span>tasks</span></div>
+            <div><strong id="totalBenchmarks">—</strong><span>benchmarks</span></div>
+            <div><strong id="totalSoftware">—</strong><span>software tools</span></div>
+          </div>
+        </div>
+        <div id="benchmarkStrip" class="benchmark-strip" aria-label="Benchmarks"></div>
+      </section>
+
+      <section class="catalog-shell" aria-labelledby="catalog-title">
+        <aside class="filters" aria-label="Catalog filters">
+          <div class="filter-heading">
+            <span>Refine</span>
+            <button id="resetFilters" class="text-button" type="button">Reset all</button>
+          </div>
+
+          <label for="benchmarkFilter">Benchmark</label>
+          <select id="benchmarkFilter">
+            <option value="">All benchmarks</option>
+          </select>
+
+          <label for="softwareFilter">Software</label>
+          <select id="softwareFilter">
+            <option value="">All software</option>
+          </select>
+
+          <label for="typeFilter">Task type</label>
+          <select id="typeFilter">
+            <option value="">All task types</option>
+          </select>
+
+          <div class="filter-note">
+            <span class="status-dot"></span>
+            <p>
+              Sourced from canonical public manifests. Upstream revisions are
+              recorded in the dataset.
+            </p>
+          </div>
+        </aside>
+
+        <div class="catalog-content">
+          <div class="catalog-topline">
+            <div>
+              <p class="section-kicker">Task explorer</p>
+              <h2 id="catalog-title"><span id="resultCount">—</span> matching tasks</h2>
+            </div>
+            <button id="exportButton" class="export-button" type="button">
+              Export filtered JSON
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <label class="search-box" for="searchInput">
+              <span aria-hidden="true">⌕</span>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Search task name, ID, or software…"
+                autocomplete="off"
+              />
+              <kbd>/</kbd>
+            </label>
+            <label class="sort-control" for="sortSelect">
+              <span>Sort</span>
+              <select id="sortSelect">
+                <option value="benchmark">Benchmark</option>
+                <option value="task_id">Task ID</option>
+                <option value="software">Software</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="loadingState" class="loading-state" role="status">
+            <span></span><span></span><span></span> Loading catalog
+          </div>
+          <div id="errorState" class="error-state" hidden></div>
+          <div id="results" class="results" aria-live="polite"></div>
+
+          <nav id="pagination" class="pagination" aria-label="Results pages" hidden>
+            <button id="previousPage" type="button">← Previous</button>
+            <span id="pageStatus"></span>
+            <button id="nextPage" type="button">Next →</button>
+          </nav>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Built for inspection, comparison, and benchmark planning.</p>
+      <p id="generatedDate"></p>
+    </footer>
+
+    <template id="taskTemplate">
+      <details class="task-card">
+        <summary>
+          <span class="task-index"></span>
+          <span class="task-primary">
+            <span class="task-badges"></span>
+            <strong class="task-preview"></strong>
+          </span>
+          <span class="task-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="task-detail">
+          <p class="task-full-name"></p>
+          <dl>
+            <div><dt>Task ID</dt><dd class="task-id"></dd></div>
+            <div><dt>Software</dt><dd class="task-software"></dd></div>
+            <div><dt>Type</dt><dd class="task-type"></dd></div>
+          </dl>
+          <div class="task-actions">
+            <button class="copy-button" type="button">Copy task JSON</button>
+            <a class="source-button" target="_blank" rel="noreferrer">Open source ↗</a>
+          </div>
+        </div>
+      </details>
+    </template>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

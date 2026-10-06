@@ -21,6 +21,16 @@ Each row contains the benchmark, canonical task ID, normalized software name(s),
 
 Only task metadata is stored here—no benchmark harnesses, application installers, videos, reference images, or other large assets.
 
+## Dataset viewer
+
+The static viewer in `dist/` supports full-text search, benchmark/software/task-type filters, sorting, pagination, task JSON copying, and filtered JSON exports. It is published privately with OpenAI Sites and can also be run locally:
+
+```bash
+python3 -m http.server 8000 --directory dist
+```
+
+Then open `http://localhost:8000`.
+
 ## Rebuild
 
 Clone the canonical upstream repositories and datasets into a common directory using the directory names expected by `scripts/build_catalog.py`, then run:
