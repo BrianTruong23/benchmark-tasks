@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Search and inspect 2,475 computer-use benchmark tasks across seven benchmark suites."
+      content="Search and inspect 3,017 computer-use benchmark tasks across eleven benchmark suites."
     />
     <meta name="theme-color" content="#11100e" />
     <title>Benchmark Task Catalog</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=6" />
   </head>
   <body>
     <a class="skip-link" href="#results">Skip to results</a>
@@ -22,24 +22,102 @@
           <small>Catalog / 2026</small>
         </span>
       </a>
-      <a
-        class="repo-link"
-        href="https://github.com/BrianTruong23/benchmark-tasks"
-        target="_blank"
-        rel="noreferrer"
-      >
-        View source <span aria-hidden="true">↗</span>
-      </a>
+      <div class="header-actions">
+        <button id="sharedCanvasButton" class="saved-nav-button" type="button" aria-pressed="false">
+          Shared-canvas
+        </button>
+        <button id="researchButton" class="saved-nav-button" type="button" aria-pressed="false">
+          Research
+        </button>
+        <button id="savedTasksButton" class="saved-nav-button" type="button" aria-pressed="false">
+          Saved tasks <span id="savedCount">0</span>
+        </button>
+        <a
+          class="repo-link"
+          href="https://github.com/BrianTruong23/benchmark-tasks"
+          target="_blank"
+          rel="noreferrer"
+        >
+          View source <span aria-hidden="true">↗</span>
+        </a>
+      </div>
     </header>
 
     <main>
+      <section id="sharedCanvasView" class="shared-canvas-view" hidden aria-labelledby="shared-canvas-title">
+        <div class="shared-canvas-view-header">
+          <div>
+            <p class="section-kicker">Approval workspace</p>
+            <h1 id="shared-canvas-title">Shared-canvas</h1>
+            <p class="shared-canvas-view-copy">
+              Review candidates benchmark by benchmark. Approving a task adds it to your saved shared-canvas collection.
+            </p>
+          </div>
+          <button id="closeSharedCanvas" class="source-button" type="button">← Back to catalog</button>
+        </div>
+
+        <div class="shared-canvas-summary" aria-label="Shared canvas review progress">
+          <div><strong id="sharedCandidateTotal">—</strong><span>flagged candidates</span></div>
+          <div><strong id="sharedApprovedTotal">—</strong><span>approved / saved</span></div>
+          <div><strong id="sharedPendingTotal">—</strong><span>awaiting review</span></div>
+        </div>
+
+        <div class="shared-canvas-controls">
+          <div>
+            <span class="shared-control-label">Benchmark queues</span>
+            <div id="sharedBenchmarkTabs" class="shared-benchmark-tabs" role="tablist" aria-label="Benchmark approval queues"></div>
+          </div>
+          <div class="shared-local-filters" aria-label="Shared canvas task filters">
+            <label for="sharedBenchmarkFilter">
+              <span>Benchmark</span>
+              <select id="sharedBenchmarkFilter"><option value="">All benchmarks</option></select>
+            </label>
+            <label for="sharedDifficultyFilter">
+              <span>Difficulty</span>
+              <select id="sharedDifficultyFilter"><option value="">All levels</option></select>
+            </label>
+            <label for="sharedSoftwareFilter">
+              <span>Software</span>
+              <select id="sharedSoftwareFilter"><option value="">All software</option></select>
+            </label>
+            <label for="sharedStatusFilter">
+              <span>Decision</span>
+              <select id="sharedStatusFilter">
+                <option value="pending">Awaiting approval</option>
+                <option value="approved">Approved / saved</option>
+                <option value="rejected">Rejected</option>
+                <option value="all">All tasks</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="shared-canvas-queue-heading">
+          <div>
+            <p id="sharedQueueKicker" class="section-kicker">Benchmark queue</p>
+            <h2 id="sharedQueueTitle">—</h2>
+          </div>
+          <span id="sharedQueueCount" class="shared-queue-count"></span>
+        </div>
+        <div id="sharedCanvasTaskGrid" class="shared-canvas-task-grid"></div>
+        <nav id="sharedPagination" class="pagination" aria-label="Shared canvas review pages" hidden>
+          <button id="sharedPreviousPage" type="button">← Previous</button>
+          <span id="sharedPageStatus"></span>
+          <button id="sharedNextPage" type="button">Next →</button>
+        </nav>
+        <div id="sharedCanvasEmpty" class="saved-empty" hidden>
+          <p class="saved-empty-title">Nothing in this queue</p>
+          <p id="sharedCanvasEmptyCopy" class="saved-empty-copy"></p>
+        </div>
+      </section>
+
       <section class="hero" aria-labelledby="page-title">
         <div class="eyebrow"><span></span> Public task inventory</div>
         <div class="hero-grid">
           <div>
             <h1 id="page-title">Every task.<br /><em>One clean view.</em></h1>
             <p class="hero-copy">
-              Browse the software, instructions, and task types behind seven
+              Browse the software, instructions, and task types behind eleven
               computer-use benchmarks. Search the full catalog or narrow it to
               exactly the slice you need.
             </p>
@@ -75,6 +153,18 @@
             <option value="">All task types</option>
           </select>
 
+          <label for="sharedCanvasFilter">Shared canvas review</label>
+          <select id="sharedCanvasFilter">
+            <option value="">All tasks</option>
+            <option value="candidate">Flagged candidates</option>
+            <option value="accepted">Accepted / saved tasks</option>
+          </select>
+
+          <label for="levelFilter">Difficulty</label>
+          <select id="levelFilter">
+            <option value="">All levels</option>
+          </select>
+
           <div class="filter-note">
             <span class="status-dot"></span>
             <p>
@@ -82,13 +172,17 @@
               recorded in the dataset.
             </p>
           </div>
+          <div class="filter-note saved-note">
+            <span class="status-dot saved-dot"></span>
+            <p>Saved tasks and notes stay in this browser.</p>
+          </div>
         </aside>
 
         <div class="catalog-content">
           <div class="catalog-topline">
             <div>
-              <p class="section-kicker">Task explorer</p>
-              <h2 id="catalog-title"><span id="resultCount">—</span> matching tasks</h2>
+              <p id="sectionKicker" class="section-kicker">Task explorer</p>
+              <h2 id="catalog-title"><span id="resultCount">—</span> <span id="resultLabel">matching tasks</span></h2>
             </div>
             <button id="exportButton" class="export-button" type="button">
               Export filtered JSON
@@ -129,6 +223,67 @@
           </nav>
         </div>
       </section>
+
+      <section id="savedDrawer" class="saved-drawer" hidden aria-labelledby="saved-drawer-title">
+        <div class="saved-drawer-header">
+          <div>
+            <p class="section-kicker">Your collection</p>
+            <h2 id="saved-drawer-title">Saved tasks</h2>
+          </div>
+          <div class="saved-drawer-actions">
+            <button id="exportSavedButton" class="export-button" type="button">Export saved JSON</button>
+            <button id="clearSavedButton" class="clear-saved-button" type="button">Clear all</button>
+            <button id="closeSavedDrawer" class="close-drawer-button" type="button" aria-label="Close saved tasks">✕</button>
+          </div>
+        </div>
+        <div id="savedGrid" class="saved-grid"></div>
+        <div id="savedEmpty" class="saved-empty" hidden>
+          <div class="saved-empty-icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <rect x="8" y="6" width="32" height="36" rx="4" stroke="currentColor" stroke-width="2"/>
+              <path d="M16 18h16M16 24h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="36" cy="36" r="10" fill="var(--panel)" stroke="var(--acid)" stroke-width="2"/>
+              <path d="M33 36h6M36 33v6" stroke="var(--acid)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="saved-empty-title">No saved tasks yet</p>
+          <p class="saved-empty-copy">Open any task in the catalog and add a note to save it here. Saved tasks stay in your browser.</p>
+        </div>
+      </section>
+
+      <section id="researchDrawer" class="research-drawer" hidden aria-labelledby="research-title">
+        <div class="research-header">
+          <div>
+            <p class="section-kicker">Research notepad</p>
+            <h2 id="research-title">Benchmark planning</h2>
+          </div>
+          <button id="closeResearch" class="close-drawer-button" type="button" aria-label="Close research notepad">✕</button>
+        </div>
+
+        <div class="research-notes-box">
+          <label for="researchNotes">Your thoughts</label>
+          <textarea id="researchNotes" rows="4" placeholder="Type your research notes here. Auto-saved in this browser."></textarea>
+          <span class="research-save-hint">auto-saved to localStorage</span>
+        </div>
+
+        <div class="research-section">
+          <h3 class="research-section-label research-label-shared">Best for multi-agent shared canvas</h3>
+          <p class="research-section-desc">Multiple agents observe and act on the same 2D artifact (design canvas, timeline, document). The challenge is coordination and conflict avoidance.</p>
+          <div class="research-grid" id="sharedCanvasGrid"></div>
+        </div>
+
+        <div class="research-section">
+          <h3 class="research-section-label research-label-multi">Best for multi-cursor</h3>
+          <p class="research-section-desc">Multiple agents run in parallel with separate cursors/sessions toward a coordinated goal. The challenge is task decomposition and synchronization.</p>
+          <div class="research-grid" id="multiCursorGrid"></div>
+        </div>
+
+        <div class="research-section">
+          <h3 class="research-section-label research-label-draft">Benchmarks to add next</h3>
+          <p class="research-section-desc">Each has a public task set and paper. Assign one agent per benchmark to parallelize ingestion.</p>
+          <div class="research-grid" id="toAddGrid"></div>
+        </div>
+      </section>
     </main>
 
     <footer>
@@ -152,16 +307,39 @@
             <div><dt>Task ID</dt><dd class="task-id"></dd></div>
             <div><dt>Software</dt><dd class="task-software"></dd></div>
             <div><dt>Type</dt><dd class="task-type"></dd></div>
+            <div><dt>Difficulty</dt><dd class="task-difficulty"></dd></div>
+            <div class="autocad-meta" hidden><dt>Level / split</dt><dd class="task-level-split"></dd></div>
+            <div class="autocad-meta" hidden><dt>Units / limit</dt><dd class="task-units-limit"></dd></div>
           </dl>
+          <p class="task-difficulty-note" hidden></p>
+          <p class="task-notes autocad-meta" hidden></p>
+          <div class="shared-canvas-review" hidden>
+            <div class="shared-canvas-review-heading">
+              <strong>Shared canvas candidate</strong>
+              <span class="shared-canvas-confidence"></span>
+            </div>
+            <p class="shared-canvas-rationale"></p>
+            <div class="shared-canvas-regions"></div>
+          </div>
+          <div class="save-panel">
+            <label class="save-label">Why are you saving this task?</label>
+            <textarea class="save-note-input" rows="3" maxlength="600" placeholder="Example: Good test for multi-app coordination…"></textarea>
+            <div class="save-controls">
+              <button class="save-task-button" type="button">Save task</button>
+              <button class="remove-saved-button" type="button" hidden>Remove from saved</button>
+              <span class="saved-status" aria-live="polite"></span>
+            </div>
+          </div>
           <div class="task-actions">
             <button class="copy-button" type="button">Copy task JSON</button>
             <a class="source-button" target="_blank" rel="noreferrer">Open source ↗</a>
+            <a class="reference-button autocad-meta" hidden target="_blank" rel="noreferrer">Open reference image ↗</a>
           </div>
         </div>
       </details>
     </template>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="./app.js" defer></script>
+    <script src="./app.js?v=11" defer></script>
   </body>
 </html>

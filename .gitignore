@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# pi.dev agent tooling
+.pi/
+
+# macOS
+.DS_Store
+
+# Editors
+*.swp
+.idea/
+.vscode/
+
+# Environment / secrets
+.env
+.env.*
+*.key
+credentials.json
