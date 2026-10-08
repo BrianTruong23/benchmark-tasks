@@ -121,6 +121,72 @@ function candidateNote(item) {
   return item.shared_canvas_note || item.shared_canvas_rationale || "Shared-canvas task approved during benchmark review.";
 }
 
+function artifactsSection(item) {
+  if (!item.artifacts?.length && !item.design_file_url) return null;
+  const section = document.createElement("div");
+  section.className = "task-artifacts";
+  const heading = document.createElement("p");
+  heading.className = "task-artifacts-heading";
+  heading.textContent = "Artifacts the agent works with";
+  section.append(heading);
+  if (item.design_file_url) {
+    const figma = document.createElement("a");
+    figma.className = "artifact-design-link";
+    figma.href = item.design_file_url;
+    figma.target = "_blank";
+    figma.rel = "noreferrer";
+    figma.textContent = "Open source design file (Figma) ↗";
+    section.append(figma);
+  }
+  if (item.artifacts?.length) {
+    const grid = document.createElement("div");
+    grid.className = "artifact-grid";
+    item.artifacts.forEach((a) => {
+      const cardEl = document.createElement("div");
+      cardEl.className = "artifact-card";
+      const lab = document.createElement("p");
+      lab.className = "artifact-label";
+      lab.textContent = a.label;
+      cardEl.append(lab);
+      if (a.image_url) {
+        const link = document.createElement("a");
+        link.href = a.image_url;
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        const img = document.createElement("img");
+        img.className = "artifact-thumb";
+        img.loading = "lazy";
+        img.alt = a.label;
+        img.src = a.image_url;
+        link.append(img);
+        cardEl.append(link);
+      }
+      if (a.note) {
+        const n = document.createElement("p");
+        n.className = "artifact-note";
+        n.textContent = a.note;
+        cardEl.append(n);
+      }
+      if (a.links?.length) {
+        const linkRow = document.createElement("div");
+        linkRow.className = "artifact-links";
+        a.links.forEach((l) => {
+          const el = document.createElement("a");
+          el.href = l.url;
+          el.target = "_blank";
+          el.rel = "noreferrer";
+          el.textContent = l.text;
+          linkRow.append(el);
+        });
+        cardEl.append(linkRow);
+      }
+      grid.append(cardEl);
+    });
+    section.append(grid);
+  }
+  return section;
+}
+
 function showToast(message) {
   elements.toast.textContent = message;
   elements.toast.classList.add("visible");
@@ -513,6 +579,12 @@ function renderResults() {
         node.querySelector("dl").append(deckRow);
       }
     }
+    const artifactEl = artifactsSection(item);
+    if (artifactEl) {
+      const detail = node.querySelector(".task-detail");
+      const dl = detail.querySelector("dl");
+      detail.insertBefore(artifactEl, dl.nextSibling);
+    }
     const benchMeta = state.catalog.benchmarks.find((b) => b.benchmark === item.benchmark);
     if (benchMeta?.paper_url) {
       const paperLink = document.createElement("a");
@@ -657,6 +729,25 @@ function sharedDecision(item) {
   return "pending";
 }
 
+function confidenceRank(item) {
+  const order = { high: 0, medium: 1, low: 2 };
+  return item.shared_canvas_confidence in order ? order[item.shared_canvas_confidence] : 3;
+}
+
+function renderSharedCanvasCriteria(data) {
+  const criterion = document.querySelector("#sharedCriterion");
+  if (criterion && data?.criterion) criterion.textContent = data.criterion;
+  const list = document.querySelector("#sharedExclusions");
+  if (list && Array.isArray(data?.exclusions)) {
+    list.replaceChildren();
+    data.exclusions.forEach((text) => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      list.append(li);
+    });
+  }
+}
+
 function sharedReviewItems() {
   return state.catalog.tasks.filter((item) => {
     const key = savedKey(item);
@@ -701,13 +792,17 @@ function renderSharedCanvasView() {
   benchmarkStats.forEach((stats) => elements.sharedBenchmarkFilter.append(option(stats.name, `${stats.name} (${stats.total})`)));
   elements.sharedBenchmarkFilter.value = state.sharedReviewBenchmark;
 
-  const levels = DIFFICULTY_ORDER.filter((level) => reviewItems.some((item) => taskDifficulty(item) === level));
+  const benchScoped = state.sharedReviewBenchmark
+    ? reviewItems.filter((item) => item.benchmark === state.sharedReviewBenchmark)
+    : reviewItems;
+
+  const levels = DIFFICULTY_ORDER.filter((level) => benchScoped.some((item) => taskDifficulty(item) === level));
   while (elements.sharedDifficultyFilter.options.length > 1) elements.sharedDifficultyFilter.remove(1);
   levels.forEach((level) => elements.sharedDifficultyFilter.append(option(level, level.charAt(0).toUpperCase() + level.slice(1))));
   if (state.sharedReviewLevel && !levels.includes(state.sharedReviewLevel)) state.sharedReviewLevel = "";
   elements.sharedDifficultyFilter.value = state.sharedReviewLevel;
 
-  const software = [...new Set(reviewItems.flatMap((item) => item.software))].sort();
+  const software = [...new Set(benchScoped.flatMap((item) => item.software))].sort();
   while (elements.sharedSoftwareFilter.options.length > 1) elements.sharedSoftwareFilter.remove(1);
   software.forEach((name) => elements.sharedSoftwareFilter.append(option(name)));
   if (state.sharedReviewSoftware && !software.includes(state.sharedReviewSoftware)) state.sharedReviewSoftware = "";
@@ -758,7 +853,11 @@ function renderSharedCanvasView() {
     .filter((item) => !state.sharedReviewLevel || taskDifficulty(item) === state.sharedReviewLevel)
     .filter((item) => !state.sharedReviewSoftware || item.software.includes(state.sharedReviewSoftware))
     .filter((item) => state.sharedReviewStatus === "all" || sharedDecision(item) === state.sharedReviewStatus)
-    .sort((a, b) => a.benchmark.localeCompare(b.benchmark) || a.task_id.localeCompare(b.task_id, undefined, { numeric: true }));
+    .sort((a, b) =>
+      confidenceRank(a) - confidenceRank(b)
+      || a.benchmark.localeCompare(b.benchmark)
+      || a.task_id.localeCompare(b.task_id, undefined, { numeric: true })
+    );
   const pageCount = Math.max(1, Math.ceil(filteredQueue.length / SHARED_PAGE_SIZE));
   state.sharedReviewPage = Math.min(state.sharedReviewPage, pageCount);
   const queueStart = (state.sharedReviewPage - 1) * SHARED_PAGE_SIZE;
@@ -867,6 +966,8 @@ function renderSharedCanvasView() {
     actions.append(approve, reject, source);
     card.append(badges, title, id, rationale);
     if (regions.children.length) card.append(regions);
+    const reviewArtifacts = artifactsSection(item);
+    if (reviewArtifacts) card.append(reviewArtifacts);
     card.append(noteLabel, actions);
     fragment.append(card);
   });
@@ -1299,13 +1400,14 @@ async function init() {
   readUrl();
   try {
     const [catalogResponse, candidatesResponse] = await Promise.all([
-      fetch("./benchmark_tasks.json"),
-      fetch("./shared_canvas_candidates.json?v=3"),
+      fetch("./benchmark_tasks.json?v=17"),
+      fetch("./shared_canvas_candidates.json?v=5"),
     ]);
     if (!catalogResponse.ok) throw new Error(`Dataset request failed (${catalogResponse.status})`);
     if (!candidatesResponse.ok) throw new Error(`Candidate review data failed (${candidatesResponse.status})`);
     state.catalog = await catalogResponse.json();
     const candidateData = await candidatesResponse.json();
+    renderSharedCanvasCriteria(candidateData);
     const candidates = new Map(candidateData.tasks.map((item) => [`${item.benchmark}::${item.task_id}`, item]));
     state.catalog.tasks.forEach((item) => {
       const candidate = candidates.get(savedKey(item));

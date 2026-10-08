@@ -9,7 +9,7 @@
     />
     <meta name="theme-color" content="#11100e" />
     <title>Benchmark Task Catalog</title>
-    <link rel="stylesheet" href="./styles.css?v=6" />
+    <link rel="stylesheet" href="./styles.css?v=8" />
   </head>
   <body>
     <a class="skip-link" href="#results">Skip to results</a>
@@ -61,6 +61,31 @@
           <div><strong id="sharedApprovedTotal">—</strong><span>approved / saved</span></div>
           <div><strong id="sharedPendingTotal">—</strong><span>awaiting review</span></div>
         </div>
+
+        <details class="shared-canvas-criteria" open>
+          <summary>Shared-canvas criteria</summary>
+          <div class="shared-canvas-criteria-body">
+            <p class="shared-canvas-criterion" id="sharedCriterion">—</p>
+            <div class="shared-canvas-tiers">
+              <div class="sc-tier sc-tier-high">
+                <span class="sc-tier-label">High</span>
+                <span>Clearly decomposes into 2+ concurrent regions on one shared artifact.</span>
+              </div>
+              <div class="sc-tier sc-tier-medium">
+                <span class="sc-tier-label">Medium</span>
+                <span>Two plausible regions, or decomposition that needs a quick human check.</span>
+              </div>
+              <div class="sc-tier sc-tier-low">
+                <span class="sc-tier-label">Low</span>
+                <span>Single-region/atomic work, or spans separate artifacts (better for multi-cursor).</span>
+              </div>
+            </div>
+            <div class="shared-canvas-exclusions">
+              <span class="shared-canvas-exclusions-label">Excluded</span>
+              <ul id="sharedExclusions"></ul>
+            </div>
+          </div>
+        </details>
 
         <div class="shared-canvas-controls">
           <div>
@@ -340,6 +365,6 @@
     </template>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="./app.js?v=11" defer></script>
+    <script src="./app.js?v=18" defer></script>
   </body>
 </html>
